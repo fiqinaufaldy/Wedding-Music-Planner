@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fiqi & Tiara — Wedding Music Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand" aria-label="FNVERSE">
+        <img class="login-brand-mark login-brand-mark-dark" src="assets/fnverse-logo-dark.webp" alt="FN">
+        <img class="login-brand-mark login-brand-mark-light" src="assets/fnverse-logo-light.webp" alt="FN">
+        <span class="login-brand-wordmark">FNVERSE</span>
+      </div>
+      <p class="eyebrow">WEDDING MUSIC PLANNER</p>
+      <h1>Fiqi & Mutiara</h1>
+      <p class="login-copy">Masukkan PIN untuk melanjutkan.</p>
+
+      <div class="pin-wrap" id="pinWrap" aria-label="PIN">
+        <input class="pin" maxlength="1" inputmode="numeric" />
+        <input class="pin" maxlength="1" inputmode="numeric" />
+        <input class="pin" maxlength="1" inputmode="numeric" />
+        <input class="pin" maxlength="1" inputmode="numeric" />
+      </div>
+
+      <button id="loginBtn" class="primary-btn">Login</button>
+      <p id="loginError" class="error-text"></p>
+
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-row">
+          <div class="brand-logo" aria-label="FNVERSE">
+          <img class="brand-logo-image brand-logo-image-dark" src="assets/fnverse-logo-dark.webp" alt="FNVERSE">
+          <img class="brand-logo-image brand-logo-image-light" src="assets/fnverse-logo-light.webp" alt="FNVERSE">
+          <span class="brand-wordmark"><strong>FNVERSE</strong><small>Wedding Music Planner</small></span>
+        </div>
+          <button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="Ciutkan menu" aria-expanded="true" title="Ciutkan menu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M15 4v16M12 9l-3 3 3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <nav>
+        <button class="nav-item active" data-page="dashboard"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13 9V3h8v6zM3 13V3h8v10zm10 8V11h8v10zM3 21v-6h8v6z"/></svg></span><span>Dashboard</span></button>
+        <button class="nav-item" data-page="songs"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 14 14" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4.645 11a.88.88 0 1 0 0-1.759a.88.88 0 0 0 0 1.76m3.957-1.1a.88.88 0 1 0 0-1.76a.88.88 0 0 0 0 1.76"/><path d="M5.525 10.12V6.339l3.957-.932v3.616"/><path d="M.5 12.25V1.75a1 1 0 0 1 1-1h3.69a1 1 0 0 1 1 .76l.31 1.24h6a1 1 0 0 1 1 1v8.5a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1"/></g></svg></span><span>Wedding Song</span></button>
+        <button class="nav-item admin-only" data-page="requests"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 5a2 2 0 1 0 0 4a2 2 0 0 0 0-4M7 7a1 1 0 1 1 2 0a1 1 0 0 1-2 0m-2.026 3.657c.03-.42.39-.657.721-.657h4.61c.331 0 .69.238.72.657c.023.315-.005.922-.46 1.453c-.461.54-1.269.89-2.565.89s-2.104-.35-2.566-.89c-.454-.531-.482-1.138-.46-1.453m1.01.343a.93.93 0 0 0 .21.46c.204.237.678.54 1.806.54s1.602-.303 1.806-.54a.93.93 0 0 0 .21-.46zM7 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm6-.5A1.5 1.5 0 0 0 11.5 1h-7A1.5 1.5 0 0 0 3 2.5v11A1.5 1.5 0 0 0 4.5 15h7a1.5 1.5 0 0 0 1.5-1.5zM4.5 2h7a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5"/></svg></span><span>Guest Request</span></button>
+        <button class="nav-item" data-page="rundown"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.346 16.539h1.539V15H7.346zm0-3.77h1.539v-1.538H7.346zm0-3.769h1.539V7.462H7.346zm3.846 7.27h5.385v-1h-5.385zm0-3.77h5.385v-1h-5.385zm0-3.77h5.385v-1h-5.385zM4 20V4h16v16zm1-1h14V5H5zm0 0V5z"/></svg></span><span>Band Guide</span></button>
+        <button class="nav-item" data-page="settings"><span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.9 12.66a1 1 0 0 1 0-1.32l1.28-1.44a1 1 0 0 0 .12-1.17l-2-3.46a1 1 0 0 0-1.07-.48l-1.88.38a1 1 0 0 1-1.15-.66l-.61-1.83a1 1 0 0 0-.95-.68h-4a1 1 0 0 0-1 .68l-.56 1.83a1 1 0 0 1-1.15.66L5 4.79a1 1 0 0 0-1 .48L2 8.73a1 1 0 0 0 .1 1.17l1.27 1.44a1 1 0 0 1 0 1.32L2.1 14.1a1 1 0 0 0-.1 1.17l2 3.46a1 1 0 0 0 1.07.48l1.88-.38a1 1 0 0 0 1.15.66l.61 1.83a1 1 0 0 0 1 .68h4a1 1 0 0 0 .95-.68l.61-1.83a1 1 0 0 0 1.15-.66l1.88.38a1 1 0 0 0 1.07-.48l2-3.46a1 1 0 0 0-.12-1.17ZM18.41 14l.8.9l-1.28 2.22l-1.18-.24a3 3 0 0 0-3.45 2L12.92 20h-2.56L10 18.86a3 3 0 0 0-3.45-2l-1.18.24l-1.3-2.21l.8-.9a3 3 0 0 0 0-4l-.8-.9l1.28-2.2l1.18.24a3 3 0 0 0 3.45-2L10.36 4h2.56l.38 1.14a3 3 0 0 0 3.45 2l1.18-.24l1.28 2.22l-.8.9a3 3 0 0 0 0 3.98m-6.77-6a4 4 0 1 0 4 4a4 4 0 0 0-4-4m0 6a2 2 0 1 1-2-2a2 2 0 0 1 2 2"/></svg></span><span>Setting</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="profile-wrap">
+          <div class="profile-card" id="profileToggle">
+            <div class="profile-avatar">F</div>
+            <div class="profile-info"><strong>Fiqi Naufaldy</strong><span id="profileRole">Admin Access</span></div>
+            <button class="profile-control" id="profileChevron" type="button" aria-expanded="false" aria-controls="profileMenu" aria-label="Open profile menu">
+              <span class="profile-control-knob" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 32 32"><title>circle-filled</title><circle cx="16" cy="16" r="10" fill="currentColor"/><path fill="currentColor" d="M16 30a14 14 0 1 1 14-14a14.016 14.016 0 0 1-14 14m0-26a12 12 0 1 0 12 12A12.014 12.014 0 0 0 16 4"/></svg></span>
+            </button>
+          </div>
+
+          <div class="profile-menu" id="profileMenu" aria-hidden="true">
+            <div class="profile-menu-row theme-row">
+              <div class="theme-row-label">
+                <span class="theme-app-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M40.5 26h-33a2 2 0 0 0-2 2v12.5a2 2 0 0 0 2 2h33a2 2 0 0 0 2-2V28a2 2 0 0 0-2-2"/><rect width="16.5" height="16.5" x="5.5" y="5.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" rx="2" ry="2"/><rect width="6.452" height="6.452" x="26" y="15.548" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" rx="2" ry="2"/><rect width="6.452" height="6.452" x="26" y="5.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" rx="2" ry="2"/><rect width="6.452" height="6.452" x="36.048" y="15.548" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" rx="2" ry="2"/><rect width="6.452" height="6.452" x="36.048" y="5.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" rx="2" ry="2"/></svg>
+                </span>
+                <span id="themeLabel">Theme</span>
+              </div>
+              <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark mode">
+                <span class="theme-option theme-light" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5s5-2.24 5-5s-2.24-5-5-5M2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1m18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1M11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1m0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1M5.99 4.58a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41zm12.37 12.37a.996.996 0 0 0-1.41 0a.996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41zm1.06-10.96a.996.996 0 0 0 0-1.41a.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0zM7.05 18.36a.996.996 0 0 0 0-1.41a.996.996 0 0 0-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0 1.03.39 1.41 0 1.03.39 1.41 0l1.06 1.06c.39.39 1.03 0 1.41 0s.39-1.03 0-1.41z"/></svg></span>
+                <span class="theme-option theme-dark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21q-3.75 0-6.375-2.625T3 12t2.625-6.375T12 3q.35 0 .688.025t.662.075q-1.025.725-1.638 1.888T11.1 7.5q0 2.25 1.575 3.825T16.5 12.9q1.375 0 2.525-.613T20.9 10.65q.05.325.075.662T21 12q0 3.75-2.625 6.375T12 21"/></svg></span>
+              </button>
+            </div>
+            <div class="profile-menu-divider"></div>
+            <button id="logoutBtn" class="logout-btn" type="button"><span class="logout-icon">↪</span><span>Keluar</span></button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="small-label">WEDDING MUSIC PLANNER</div>
+          <h1 id="pageTitle">Wedding Song</h1>
+          <p id="pageSubtitle">Daftar lagu untuk seluruh rangkaian wedding Fiqi & Tiara.</p>
+        </div>
+        <div class="topbar-right">
+          <div class="role-pill" id="rolePill"></div>
+          <div id="bandGuideTopActions" class="band-guide-actions topbar-band-actions hidden">
+            <button id="printBandGuideBtn" class="secondary-btn"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><title>pdf-line</title><path fill="currentColor" d="M13.293 17.1a5.02 5.02 0 0 0-3.114.172c-.53.188-.991.408-1.469-.05a1.01 1.01 0 0 1-.129-1.293c.226-.326.625-.539.906-.813a5 5 0 0 0 1.357-2.35c.165-.651.073-1.493.876-1.726a1.01 1.01 0 0 1 1.185.535c.097.207.115.506.153.715c.111.616.299 1.2.613 1.745c.229.396.513.761.841 1.081c.34.331.873.587 1.033 1.064c.284.841-.515 1.495-1.306 1.253l-.419-.161Zm-7.407 4.893C4.798 21.894 4.04 21.092 4 20V4c.042-1.135.865-1.958 2-2h7.586c.296.01.584.067.853.194c.209.099.393.235.561.392L19.414 7c.37.396.568.872.586 1.414V20c-.024.645-.307 1.244-.838 1.624A2.1 2.1 0 0 1 18 22H6ZM12 4l-5.994.006v15.988h11.988L18 10h-4.5A1.534 1.534 0 0 1 12 8.5Zm2 4h3.586L14 4.414Z"/></svg><span>Cetak / PDF</span></button>
+            <button id="shareBandGuideBtn" class="primary-btn"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><title>share</title><path fill="currentColor" d="M17 22q-1.25 0-2.125-.875T14 19q0-.15.075-.7L7.05 14.2q-.4.375-.925.588T5 15q-1.25 0-2.125-.875T2 12t.875-2.125T5 9q.6 0 1.125.213t.925.587l7.025-4.1q-.05-.175-.062-.337T14 5q0-1.25.875-2.125T17 2t2.125.875T20 5t-.875 2.125T17 8q-.6 0-1.125-.213T14.95 7.2l-7.025 4.1q.05.175.063.338T8 12t-.012.363t-.063.337l7.025 4.1q.4-.375.925-.587T17 16q1.25 0 2.125.875T20 19t-.875 2.125T17 22"/></svg><span>Bagikan</span></button>
+          </div>
+        </div>
+      </header>
+
+      <section id="dashboardPage" class="page">
+        <div class="dashboard-hero">
+          <div>
+            <div class="small-label">FNVERSE · WEDDING MUSIC PLANNER</div>
+            <h2>Fiqi & Mutiara</h2>
+            <p>9 Mei 2027 · Surabaya</p>
+          </div>
+          <div class="dashboard-mark">♫</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><span>Total Songs</span><strong id="statSongs">0</strong></div>
+          <div class="stat-card"><span>Confirmed</span><strong id="statConfirmed">0</strong></div>
+          <div class="stat-card"><span>Performers</span><strong id="statPerformers">0</strong></div>
+          <div class="stat-card"><span>Guest Requests</span><strong id="statRequests">0</strong></div>
+        </div>
+        <div class="dashboard-lower">
+          <div class="panel">
+            <div class="panel-head"><h3>Recent Wedding Songs</h3><span id="recentCount">Latest</span></div>
+            <div id="recentSongs"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="songsPage" class="page">
+        <div class="toolbar">
+          <div class="search">
+            <span>⌕</span>
+            <input id="searchInput" type="text" placeholder="Search by title, artist, category, or notes..." />
+          </div>
+          <div class="select-wrap">
+            <select id="categoryFilter">
+              <option value="">All Category</option>
+            </select>
+          </div>
+          <div class="select-wrap">
+            <select id="performerFilter">
+              <option value="">All Performer</option>
+            </select>
+          </div>
+          <div class="select-wrap">
+            <select id="statusFilter">
+              <option value="">All Status</option>
+            </select>
+          </div>
+          <button id="addSongBtn" class="primary-btn admin-only">+ Add Song</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Title</th>
+                  <th>Artis / Band</th>
+                  <th>Durasi</th>
+                  <th>Personal Notes</th>
+                  <th>Category</th>
+                  <th>Performer</th>
+                  <th>Status</th>
+                  <th>Chord Dasar</th>
+                  <th>Reference Aransement</th>
+                  <th>Notes</th>
+                  <th class="admin-only">Action</th>
+                </tr>
+              </thead>
+              <tbody id="songTableBody"></tbody>
+            </table>
+          </div>
+          <div id="emptyState" class="empty hidden">Belum ada lagu yang sesuai.</div>
+        </div>
+      </section>
+
+      <div id="songHorizontalMouse" class="horizontal-mouse-nav hidden" aria-label="Horizontal table navigation" title="Geser tabel kiri / kanan">
+        <button type="button" class="mouse-nav-btn" id="songScrollLeft" aria-label="Geser tabel ke kiri" title="Geser ke kiri">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="mouse-nav-wheel" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <button type="button" class="mouse-nav-btn" id="songScrollRight" aria-label="Geser tabel ke kanan" title="Geser ke kanan">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <section id="requestsPage" class="page hidden">
+        <div class="guest-stats">
+          <div class="guest-stat guest-stat-total"><span class="guest-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13M9 18a3 3 0 1 1-3-3a3 3 0 0 1 3 3m10-2a3 3 0 1 1-3-3a3 3 0 0 1 3 3"/></svg></span><div><span>Total Request</span><strong id="guestTotal">0</strong></div></div>
+          <div class="guest-stat guest-stat-approved"><span class="guest-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span><div><span>Approved</span><strong id="guestApproved">0</strong></div></div>
+          <div class="guest-stat guest-stat-pending"><span class="guest-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><div><span>Pending</span><strong id="guestPending">0</strong></div></div>
+          <div class="guest-stat guest-stat-rejected"><span class="guest-stat-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg></span><div><span>Rejected</span><strong id="guestRejected">0</strong></div></div>
+        </div>
+
+        <div class="guest-table-card">
+          <div class="guest-table-head">
+            <div>
+              <h3>Request Lagu</h3>
+              <p>Daftar lagu yang diminta oleh tamu.</p>
+            </div>
+            <div class="guest-toolbar">
+              <label class="guest-search"><span class="guest-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></span><input id="requestSearch" type="search" placeholder="Cari lagu, artis, atau nama tamu..." /></label>
+              <button id="addRequestBtn" class="primary-btn guest-add-btn">+ Add Request</button>
+            </div>
+          </div>
+          <div class="guest-table-scroll">
+            <table class="guest-table">
+              <thead><tr><th>No.</th><th>Judul Lagu</th><th>Requester</th><th>Notes</th><th>Status</th><th>Chord Dasar</th><th>Reference Aransement</th><th>Durasi</th><th>Aksi</th></tr></thead>
+              <tbody id="requestList"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="settingsPage" class="page hidden">
+        <div class="section-head">
+          <div>
+            <div class="small-label">SETTING</div>
+            <h2>Appearance</h2>
+            <p>Sesuaikan tampilan Wedding Music Planner.</p>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div>
+            <strong>Appearance</strong>
+            <span>Light / Dark mode sekarang dikontrol langsung dari menu di kiri bawah.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="rundownPage" class="page hidden">
+  <div class="band-summary">
+    <div class="band-stat"><span>Total Lagu</span><strong id="bgTotal">0</strong></div>
+    <div class="band-stat priority-must"><span><i></i> Must Play</span><strong id="bgMust">0</strong></div>
+    <div class="band-stat priority-should"><span><i></i> Should Play</span><strong id="bgShould">0</strong></div>
+    <div class="band-stat priority-flex"><span><i></i> Flexible</span><strong id="bgFlex">0</strong></div>
+    <div class="band-stat priority-skip"><span><i></i> Skip if Needed</span><strong id="bgSkip">0</strong></div>
+  </div>
+
+  <div class="priority-legend">
+    <div class="legend-title"><span class="info-circle">i</span><strong>Prioritas Lagu</strong></div>
+    <div class="legend-item"><span class="priority-badge must">Must Play</span><b>= Confirmed</b><small>Wajib dimainkan.</small></div>
+    <div class="legend-item"><span class="priority-badge should">Should Play</span><b>= Quite Good</b><small>Sebaiknya dimainkan.</small></div>
+    <div class="legend-item"><span class="priority-badge flex">Flexible</span><b>= So So</b><small>Bisa dimainkan jika waktu memungkinkan.</small></div>
+    <div class="legend-item"><span class="priority-badge skip">Skip if Needed</span><b>= Cancelled</b><small>Dikorbankan jika waktu tidak cukup.</small></div>
+  </div>
+
+  <div class="band-tabs">
+    <button class="band-tab active" data-bg-tab="list">Daftar Lagu</button>
+    <button class="band-tab" data-bg-tab="summary">Ringkasan per Prioritas</button>
+  </div>
+
+  <div id="bandGuideList" class="band-guide-list"></div>
+  <div id="bandGuideSummary" class="band-guide-summary hidden"></div>
+</section>
+    </main>
+  </div>
+
+  <!-- Song modal -->
+  <div id="songModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card form-modal">
+      <button class="close-btn" data-close="songModal">×</button>
+      <div class="small-label" id="songModalLabel">ADD SONG</div>
+      <h2 id="songModalTitle">Add Wedding Song</h2>
+      <form id="songForm">
+        <input type="hidden" id="songId">
+        <div class="form-grid">
+          <label>Title<input id="fTitle" required></label>
+          <label>Artis / Band<input id="fArtist"></label>
+          <label>Durasi<input id="fDuration" placeholder="04:30"></label>
+          <label>Category<input id="fCategory" placeholder="Entrance / Akad / Reception"></label>
+          <label>Performer<input id="fPerformer" placeholder="Live Band / Singer / DJ"></label>
+          <label>Status>
+            <select id="fStatus">
+              <option>Planned</option>
+              <option>Pending</option>
+              <option>Confirmed</option>
+              <option>Guest Request</option>
+              <option>Not Available</option>
+              <option>Cancelled</option>
+            </select>
+          </label>
+          <label>Chord Dasar<input id="fKey" placeholder="C / D / Bb"></label>
+          <label>Reference Aransement URL<input id="fReference" type="url" placeholder="https://youtube.com/..."></label>
+        </div>
+        <label>Personal Notes<textarea id="fPersonalNotes" rows="3"></textarea></label>
+        <label>Notes<textarea id="fNotes" rows="3"></textarea></label>
+        <div class="form-actions">
+          <button type="button" class="secondary-btn" data-close="songModal">Cancel</button>
+          <button type="submit" class="primary-btn">Save Song</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reference modal -->
+  <div id="referenceModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card reference-modal">
+      <button class="close-btn" data-close="referenceModal">×</button>
+      <div class="reference-kicker"><span>ARRANGEMENT REFERENCE</span><i></i></div>
+      <h2 id="referenceTitle">Reference</h2>
+      <div id="referenceArtist" class="reference-artist"></div>
+      <div id="referencePlayer" class="player-wrap"></div>
+      <div class="reference-footer">
+        <a id="openReference" class="reference-primary" target="_blank" rel="noopener">
+          <span class="external-link-icon" aria-hidden="true">↗</span>
+          <span>Open Original Reference</span>
+        </a>
+        <span class="reference-divider" aria-hidden="true"></span>
+        <span class="reference-note"><span class="youtube-mini" aria-hidden="true">▶</span> Watch the full arrangement on YouTube</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request modal -->
+  <div id="requestModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card form-modal small-modal">
+      <button class="close-btn" data-close="requestModal">×</button>
+      <div class="small-label">GUEST REQUEST</div>
+      <h2>Add Song Request</h2>
+      <form id="requestForm">
+        <label>Name<input id="rName" required></label>
+        <label>Song Title<input id="rTitle" required></label>
+        <label>Artis / Band<input id="rArtist"></label>
+        <label>Performer<input id="rPerformer"></label>
+        <label>Note<textarea id="rNote" rows="3"></textarea></label>
+        <div class="form-actions">
+          <button type="button" class="secondary-btn" data-close="requestModal">Cancel</button>
+          <button type="submit" class="primary-btn">Save Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/songs.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
