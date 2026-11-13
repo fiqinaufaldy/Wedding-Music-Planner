@@ -254,9 +254,18 @@
     <div class="legend-item"><span class="priority-badge skip">Skip if Needed</span><b>= Cancelled</b><small>Dikorbankan jika waktu tidak cukup.</small></div>
   </div>
 
-  <div class="band-tabs">
-    <button class="band-tab active" data-bg-tab="list">Daftar Lagu</button>
-    <button class="band-tab" data-bg-tab="summary">Ringkasan per Prioritas</button>
+  <div class="band-guide-controls">
+    <div class="band-tabs">
+      <button class="band-tab active" data-bg-tab="list">Daftar Lagu</button>
+      <button class="band-tab" data-bg-tab="summary">Ringkasan per Prioritas</button>
+    </div>
+    <div class="band-guide-progress" aria-label="Progress lagu dimainkan">
+      <div class="band-guide-progress-label">
+        <span>Progress Playback</span>
+        <strong id="bgPlayedProgress">0 / 0 Lagu (0%)</strong>
+      </div>
+      <div class="band-guide-progress-track"><span id="bgPlayedProgressBar"></span></div>
+    </div>
   </div>
 
   <div id="bandGuideList" class="band-guide-list"></div>

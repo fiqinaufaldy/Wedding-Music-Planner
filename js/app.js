@@ -5,10 +5,12 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
 const SONG_DATA_VERSION = "2026-11-13-46";
+const PLAYED_SONGS_KEY = "bandGuidePlayedSongs";
 
 let role = null;
 let songs = loadSongs();
 let requests = load("weddingRequests", DEFAULT_REQUESTS);
+let playedSongs = loadPlayedSongs();
 
 function loadSongs() {
   // Force the supplied 46-song master data to replace any older browser cache.
@@ -38,6 +40,27 @@ function load(key, fallback) {
 function save() {
   localStorage.setItem("weddingSongs", JSON.stringify(songs));
   localStorage.setItem("weddingRequests", JSON.stringify(requests));
+  localStorage.setItem(PLAYED_SONGS_KEY, JSON.stringify(playedSongs));
+}
+function loadPlayedSongs() {
+  const saved = localStorage.getItem(PLAYED_SONGS_KEY);
+  if (!saved) return {};
+  try {
+    const parsed = JSON.parse(saved);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+function isSongPlayed(songId) {
+  return !!playedSongs[songId];
+}
+function toggleSongPlayed(songId) {
+  if (!songId) return;
+  if (playedSongs[songId]) delete playedSongs[songId];
+  else playedSongs[songId] = true;
+  localStorage.setItem(PLAYED_SONGS_KEY, JSON.stringify(playedSongs));
+  renderBandGuide();
 }
 function escapeHtml(v="") {
   return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -307,7 +330,20 @@ function getBandGroups(){
   songs.forEach((song,i)=>groups[bandSectionFor(song,i)].push(song));
   return Object.entries(groups).filter(([,list])=>list.length).map(([name,list])=>({name,songs:list}));
 }
+function updateBandGuideProgress() {
+  const total = songs.length;
+  const played = songs.filter(s => isSongPlayed(s.id)).length;
+  const percent = total ? Math.round((played / total) * 100) : 0;
+  if ($("#bgPlayedProgress")) $("#bgPlayedProgress").textContent = `${played} / ${total} Lagu (${percent}%)`;
+  if ($("#bgPlayedProgressBar")) $("#bgPlayedProgressBar").style.width = `${percent}%`;
+  return { total, played, percent };
+}
+
 function renderBandGuide(){
+  const validSongIds = new Set(songs.map(s => s.id));
+  Object.keys(playedSongs).forEach(id => { if (!validSongIds.has(id)) delete playedSongs[id]; });
+  updateBandGuideProgress();
+
   const total=songs.length;
   const counts={Confirmed:0,"Quite Good":0,"So So":0,Cancelled:0};
   songs.forEach(s=>counts[s.status]=(counts[s.status]||0)+1);
@@ -318,18 +354,34 @@ function renderBandGuide(){
   const groups=getBandGroups();
   $("#bandGuideList").innerHTML=groups.map(g=>{
     const totalSec=g.songs.reduce((a,s)=>a+durationSeconds(s.duration),0);
+    const playedCount=g.songs.filter(s=>isSongPlayed(s.id)).length;
+    const sectionPercent=g.songs.length ? Math.round((playedCount/g.songs.length)*100) : 0;
     const open=bandGuideOpen[g.name]!==false;
     const subtitle=g.name==="Opening"?"Lagu pembuka untuk mengawali acara.":g.name==="Closing"?"Lagu penutup untuk mengakhiri acara.":"Lagu utama yang dimainkan selama acara berlangsung.";
     return `<section class="band-section ${open?"open":"collapsed"}">
       <div class="band-section-head" data-band-collapse="${escapeHtml(g.name)}">
         <div class="band-section-icon">${bandSectionIcon(g.name)}</div>
         <div class="band-section-title"><h3>${escapeHtml(g.name)}</h3><p>${subtitle}</p></div>
-        <div class="band-section-meta"><span>${g.songs.length} Lagu</span><span>± ${formatBandTotal(totalSec)}</span></div>
+        <div class="band-section-meta"><span>${g.songs.length} Lagu</span><span>± ${formatBandTotal(totalSec)}</span>${playedCount ? `<span class="section-played-count">✓ ${playedCount} Selesai (${sectionPercent}%)</span>` : ""}</div>
         <button class="band-section-chevron" type="button" aria-label="Toggle section">${open ? `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><title>arrow-up-2</title><path fill="currentColor" fill-rule="evenodd" d="M11.512 8.43a.75.75 0 0 1 .976 0l7 6a.75.75 0 1 1-.976 1.14L12 9.987l-6.512 5.581a.75.75 0 1 1-.976-1.138z" clip-rule="evenodd"/></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><title>arrow-down-2</title><path fill="currentColor" fill-rule="evenodd" d="M4.43 8.512a.75.75 0 0 1 1.058-.081L12 14.012l6.512-5.581a.75.75 0 0 1 .976 1.138l-7 6a.75.75 0 0 1-.976 0l-7-6a.75.75 0 0 1-.081-1.057" clip-rule="evenodd"/></svg>`}</button>
       </div>
       <div class="band-section-body">
         <div class="band-table-head"><span>NO.</span><span>JUDUL LAGU</span><span>ARTIS</span><span>STATUS</span><span>DURASI</span></div>
-        ${g.songs.map((s,i)=>{const p=bandPriority(s.status); return `<div class="band-song-row"><span>${i+1}</span><div class="band-song-title"><strong>${escapeHtml(s.title)}</strong></div><div class="band-artist">${escapeHtml(s.performer||"-")} · ${escapeHtml(s.artist||"-")}</div><span class="priority-badge ${p.cls}"><i></i>${p.label}</span><span class="band-duration">${escapeHtml(s.duration||"--:--")}</span></div>`}).join("")}
+        ${g.songs.map((s,i)=>{
+          const p=bandPriority(s.status);
+          const played=isSongPlayed(s.id);
+          return `<div class="band-song-row ${played?"is-played":""}" data-song-id="${escapeHtml(s.id)}">
+            <span>${i+1}</span>
+            <div class="band-song-title"><strong>${escapeHtml(s.title)}</strong></div>
+            <div class="band-artist">${escapeHtml(s.performer||"-")} · ${escapeHtml(s.artist||"-")}</div>
+            <span class="priority-badge ${p.cls}"><i></i>${p.label}</span>
+            <span class="band-duration">${escapeHtml(s.duration||"--:--")}</span>
+            <button class="band-played-toggle ${played?"checked":""}" type="button" data-played-id="${escapeHtml(s.id)}" aria-pressed="${played}" aria-label="${played?"Tandai belum dimainkan":"Tandai sudah dimainkan"}">
+              <span class="band-check-box">${played ? "✓" : ""}</span>
+              <span>${played ? "Sudah Dimainkan" : "Belum Dimainkan"}</span>
+            </button>
+          </div>`;
+        }).join("")}
       </div>
     </section>`;
   }).join("");
@@ -396,7 +448,20 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("#printBandGuideBtn")?.addEventListener("click",()=>window.print());
   $("#shareBandGuideBtn")?.addEventListener("click",async()=>{try{await navigator.share({title:"Fiqi & Tiara — Band Guide",text:"Wedding Music Planner — Band Guide"});}catch(e){}});
   $$(".band-tab").forEach(btn=>btn.addEventListener("click",()=>{bandGuideTab=btn.dataset.bgTab;localStorage.setItem("bandGuideTab",bandGuideTab);renderBandGuide();}));
-  $("#bandGuideList")?.addEventListener("click",e=>{const head=e.target.closest("[data-band-collapse]"); if(!head)return; const name=head.dataset.bandCollapse; bandGuideOpen[name]=bandGuideOpen[name]===false; localStorage.setItem("bandGuideOpen",JSON.stringify(bandGuideOpen)); renderBandGuide();});
+  $("#bandGuideList")?.addEventListener("click",e=>{
+    const playedBtn=e.target.closest("[data-played-id]");
+    if(playedBtn){
+      e.stopPropagation();
+      toggleSongPlayed(playedBtn.dataset.playedId);
+      return;
+    }
+    const head=e.target.closest("[data-band-collapse]");
+    if(!head)return;
+    const name=head.dataset.bandCollapse;
+    bandGuideOpen[name]=bandGuideOpen[name]===false;
+    localStorage.setItem("bandGuideOpen",JSON.stringify(bandGuideOpen));
+    renderBandGuide();
+  });
   $("#addRequestBtn").addEventListener("click",()=>openModal("requestModal"));
   $("#requestSearch")?.addEventListener("input", renderRequests);
   document.addEventListener("click", e => { const btn=e.target.closest(".guest-reference-btn"); if(btn?.dataset.reference) openReference(btn.dataset.reference); });
