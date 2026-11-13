@@ -796,8 +796,8 @@ body.dark .guest-add-btn{background:#d88ca6;color:#181319}.guest-add-btn:hover{b
 .band-guide-progress-track{height:7px;border-radius:999px;background:var(--surface2);overflow:hidden}
 .band-guide-progress-track span{display:block;height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .25s ease}
 .band-section-meta .section-played-count{color:var(--accent);font-weight:600}
-.band-song-row{grid-template-columns:80px minmax(230px,1.2fr) minmax(250px,1.3fr) 170px 90px 170px}
-.band-table-head{grid-template-columns:80px minmax(230px,1.2fr) minmax(250px,1.3fr) 170px 90px 170px}
+.band-song-row{grid-template-columns:55px minmax(200px,1.1fr) minmax(220px,1fr) 150px 80px 150px}
+.band-table-head{grid-template-columns:55px minmax(230px,1.2fr) minmax(250px,1.3fr) 150px 90px 130px}
 .band-table-head span:last-child{text-align:right}
 .band-played-toggle{border:0;background:transparent;color:var(--muted);display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;padding:7px 0;font-size:10px;white-space:nowrap}
 .band-played-toggle:hover{color:var(--text)}
@@ -811,7 +811,7 @@ body:not(.dark) .band-played-toggle.checked .band-check-box{background:var(--acc
 @media(max-width:1100px){
   .band-guide-controls{align-items:stretch}
   .band-guide-progress{min-width:280px}
-  .band-table-head,.band-song-row{grid-template-columns:50px minmax(180px,1fr) minmax(180px,1fr) 130px 75px 150px;padding-left:22px;padding-right:22px}
+  .band-table-head,.band-song-row{grid-template-columns:45px minmax(190px,1fr) minmax(200px,1.15fr) 120px 75px 125px;padding-left:22px;padding-right:22px}
 }
 @media(max-width:760px){
   .band-guide-controls{display:block}
