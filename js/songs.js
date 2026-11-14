@@ -131,13 +131,13 @@ const DEFAULT_SONGS = [
   },
   {
     id: "song-011",
-    title: "Teman Hidup",
+    title: "Adu Rayu",
     artist: "Tulus",
-    duration: "04:07",
-    personalNotes: "2014",
+    duration: "03:27",
+    personalNotes: "2022",
     category: "Resepsi",
     performer: "Elegantie Band",
-    status: "So So",
+    status: "Quite Good",
     key: "-",
     reference: "",
     notes: ""
