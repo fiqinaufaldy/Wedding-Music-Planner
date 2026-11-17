@@ -340,11 +340,16 @@
       <div class="small-label">GUEST REQUEST</div>
       <h2>Add Song Request</h2>
       <form id="requestForm">
-        <label>Name<input id="rName" required></label>
-        <label>Song Title<input id="rTitle" required></label>
-        <label>Artis / Band<input id="rArtist"></label>
-        <label>Performer<input id="rPerformer"></label>
-        <label>Note<textarea id="rNote" rows="3"></textarea></label>
+        <div class="form-grid">
+          <label>Name<input id="rName" autocomplete="name" placeholder="Your name" required></label>
+          <label>Song Title<input id="rTitle" autocomplete="off" placeholder="Song title" required></label>
+          <label>Band / Artis<input id="rArtist" autocomplete="off" placeholder="Artist / band"></label>
+          <label>Performer<input id="rPerformer" autocomplete="off" placeholder="Optional"></label>
+          <label>Chord Dasar<input id="rKey" autocomplete="off" placeholder="e.g. A, C, G"></label>
+          <label>Durasi Aksi<input id="rDuration" autocomplete="off" placeholder="e.g. 03:45"></label>
+        </div>
+        <label>Reference Arrangement<input id="rReference" type="url" autocomplete="off" placeholder="YouTube / Instagram / TikTok link"></label>
+        <label>Notes<textarea id="rNote" rows="3" placeholder="Additional note for the band"></textarea></label>
         <div class="form-actions">
           <button type="button" class="secondary-btn" data-close="requestModal">Cancel</button>
           <button type="submit" class="primary-btn">Save Request</button>
@@ -353,7 +358,6 @@
     </div>
   </div>
 
-  <script src="js/songs.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -7,28 +7,137 @@ const $$ = (s) => [...document.querySelectorAll(s)];
 const SONG_DATA_VERSION = "2026-11-13-46";
 const PLAYED_SONGS_KEY = "bandGuidePlayedSongs";
 
+// Google Sheets / Apps Script source for STAGING.
+// Leave empty to use the bundled songs.js fallback.
+const GOOGLE_SHEET_API_URL = "/api/songs";
+const GOOGLE_SHEET_FETCH_TIMEOUT = 10000;
+const GUEST_REQUESTS_API_URL = "/api/guest-requests";
+
 let role = null;
 let songs = loadSongs();
-let requests = load("weddingRequests", DEFAULT_REQUESTS);
+let requests = [];
 let playedSongs = loadPlayedSongs();
 
-function loadSongs() {
-  // Force the supplied 46-song master data to replace any older browser cache.
-  // After this migration, normal edits are persisted as usual.
-  if (localStorage.getItem("weddingSongsVersion") !== SONG_DATA_VERSION) {
-    localStorage.setItem("weddingSongsVersion", SONG_DATA_VERSION);
-    localStorage.setItem("weddingSongs", JSON.stringify(DEFAULT_SONGS));
-    return structuredClone(DEFAULT_SONGS);
+function normalizeSheetSong(row, index) {
+  const pick = (...keys) => {
+    for (const key of keys) {
+      if (row && row[key] !== undefined && row[key] !== null) return String(row[key]).trim();
+    }
+    return "";
+  };
+  return {
+    id: pick("id", "ID") || `song-${String(index + 1).padStart(3, "0")}`,
+    title: pick("title", "Title", "Judul Lagu"),
+    artist: pick("artist", "Artist", "Artis", "Artis / Band"),
+    duration: pick("duration", "Duration", "Durasi"),
+    personalNotes: pick("personalNotes", "Personal Notes", "PersonalNotes"),
+    category: pick("category", "Category", "Kategori") || "Other",
+    performer: pick("performer", "Performer") || "TBD",
+    status: pick("status", "Status") || "So So",
+    key: pick("key", "Key", "Chord", "Chord Dasar", "Nada Dasar Lagu (Chord Dasar)"),
+    reference: pick("reference", "Reference", "Reference Arrangement", "Reference Aransement"),
+    notes: pick("notes", "Notes"),
+    section: pick("section", "Section", "Bagian") || "Main Event"
+  };
+}
+
+function normalizeSheetResponse(payload) {
+  const rows = Array.isArray(payload) ? payload : (payload?.data || payload?.songs || payload?.rows || []);
+  if (!Array.isArray(rows)) return [];
+  return rows.map(normalizeSheetSong).filter(s => s.title);
+}
+
+async function fetchGoogleSheetSongs() {
+  if (!GOOGLE_SHEET_API_URL) return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GOOGLE_SHEET_FETCH_TIMEOUT);
+  try {
+    const res = await fetch(GOOGLE_SHEET_API_URL, { method: "GET", cache: "no-store", signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const payload = await res.json();
+    const remoteSongs = normalizeSheetResponse(payload);
+    if (!remoteSongs.length) throw new Error("Google Sheet returned no song rows.");
+    return remoteSongs;
+  } catch (err) {
+    console.warn("Google Sheet unavailable. Using bundled/local song data instead.", err);
+    return null;
+  } finally {
+    clearTimeout(timeout);
   }
+}
+
+function normalizeGuestRequest(row, index) {
+  const pick = (...keys) => {
+    for (const key of keys) {
+      if (row && row[key] !== undefined && row[key] !== null) return String(row[key]).trim();
+    }
+    return "";
+  };
+  return {
+    id: pick("id", "ID") || `req-${String(index + 1).padStart(3, "0")}`,
+    title: pick("title", "Title", "Judul Lagu"),
+    artist: pick("artist", "Artist", "Artis", "Band / Artis", "Artis / Band"),
+    name: pick("name", "Name", "Requester", "Requestor"),
+    note: pick("note", "Note", "Notes"),
+    status: pick("status", "Status") || "Pending",
+    key: pick("key", "Key", "Chord", "Chord Dasar"),
+    reference: pick("reference", "Reference", "Reference Arrangement", "Reference Aransement"),
+    duration: pick("duration", "Duration", "Durasi", "Durasi Aksi"),
+    performer: pick("performer", "Performer")
+  };
+}
+
+async function fetchGuestRequests() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GOOGLE_SHEET_FETCH_TIMEOUT);
+  try {
+    const res = await fetch(GUEST_REQUESTS_API_URL, { method: "GET", cache: "no-store", signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const payload = await res.json();
+    const rows = Array.isArray(payload) ? payload : (payload?.data || payload?.requests || payload?.rows || []);
+    if (!Array.isArray(rows)) throw new Error("Guest Request response is not an array.");
+    return rows.map(normalizeGuestRequest).filter(r => r.title);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function guestRequestAction(action, payload) {
+  const res = await fetch(GUEST_REQUESTS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data?.success === false) throw new Error(data?.error || `HTTP ${res.status}`);
+  return data;
+}
+
+async function refreshGuestRequests() {
+  try {
+    requests = await fetchGuestRequests();
+    renderRequests();
+    updateDashboard();
+    return true;
+  } catch (err) {
+    console.error("Guest Request Google Sheet unavailable:", err);
+    requests = [];
+    renderRequests();
+    updateDashboard();
+    return false;
+  }
+}
+
+function loadSongs() {
+  // Google Sheet is now the primary source. Keep only a previously cached
+  // copy as a temporary fallback; do not depend on DEFAULT_SONGS/songs.js.
   const saved = localStorage.getItem("weddingSongs");
-  if (!saved) return structuredClone(DEFAULT_SONGS);
+  if (!saved) return [];
   try {
     const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) && parsed.length === DEFAULT_SONGS.length
-      ? parsed
-      : structuredClone(DEFAULT_SONGS);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return structuredClone(DEFAULT_SONGS);
+    return [];
   }
 }
 
@@ -39,7 +148,6 @@ function load(key, fallback) {
 }
 function save() {
   localStorage.setItem("weddingSongs", JSON.stringify(songs));
-  localStorage.setItem("weddingRequests", JSON.stringify(requests));
   localStorage.setItem(PLAYED_SONGS_KEY, JSON.stringify(playedSongs));
 }
 function loadPlayedSongs() {
@@ -105,7 +213,8 @@ function applyRole() {
   $("#rolePill").innerHTML = isAdmin
     ? `${adminIcon}<span>Admin Access</span>`
     : `${memberIcon}<span>Member Access</span>`;
-  $("#roleCard").innerHTML = isAdmin
+  const roleCard = $("#roleCard");
+  if (roleCard) roleCard.innerHTML = isAdmin
     ? "<strong>Admin Access</strong><span>Full management access.</span>"
     : "<strong>Guest Access</strong><span>Read-only access.</span>";
 }
@@ -275,13 +384,25 @@ function renderRequests() {
     </tr>`;
   }).join("") : `<tr><td colspan="9" class="guest-empty">Tidak ada request yang cocok.</td></tr>`;
 }
-function approveRequest(id, status) {
-  const r = requests.find(x=>x.id===id); if(!r) return; r.status=status; save(); renderRequests();
-}
-function promoteRequest(id) {
+async function approveRequest(id, status) {
   const r = requests.find(x=>x.id===id); if(!r) return;
-  songs.push({id:`song-${Date.now()}`,title:r.title,artist:r.artist,duration:"",personalNotes:r.note,category:"Reception",performer:r.performer||r.name,status:"Guest Request",key:"",reference:"",notes:"Added from guest request"});
-  save(); renderRequests(); renderSongs(); updateDashboard();
+  try {
+    await guestRequestAction("updateGuestRequest", { id, status });
+    await refreshGuestRequests();
+  } catch (err) {
+    alert(`Gagal mengubah status request: ${err.message}`);
+  }
+}
+async function promoteRequest(id) {
+  const r = requests.find(x=>x.id===id); if(!r) return;
+  try {
+    await guestRequestAction("addToMainPlaylist", { request: r });
+    await refreshGuestRequests();
+    const remoteSongs = await fetchGoogleSheetSongs();
+    if (remoteSongs) { songs = remoteSongs; localStorage.setItem("weddingSongs", JSON.stringify(songs)); renderSongs(); updateDashboard(); if (typeof renderBandGuide === "function") renderBandGuide(); }
+  } catch (err) {
+    alert(`Gagal menambahkan ke Main Playlist: ${err.message}`);
+  }
 }
 let bandGuideOpen = JSON.parse(localStorage.getItem("bandGuideOpen") || "{}");
 let bandGuideTab = localStorage.getItem("bandGuideTab") || "list";
@@ -434,17 +555,36 @@ function setTheme(theme) {
   if ($("#themeToggle")) $("#themeToggle").setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async()=>{
   setupPins();
-  $("#loginBtn").addEventListener("click",login);
-  $("#logoutBtn").addEventListener("click",logout);
-  $("#songForm").addEventListener("submit",saveSong);
-  $("#requestForm").addEventListener("submit",e=>{
+
+  // Bind login/UI handlers before waiting for the remote data.
+  // A slow or unavailable Google Sheet must never make the Login button dead.
+  // Login is bound defensively so missing optional UI elements cannot break initialization.
+  $("#loginBtn")?.addEventListener("click", login);
+  $("#logoutBtn")?.addEventListener("click",logout);
+  $("#songForm")?.addEventListener("submit",saveSong);
+  $("#requestForm")?.addEventListener("submit",async e=>{
     e.preventDefault();
-    requests.push({id:`req-${Date.now()}`,name:$("#rName").value.trim(),title:$("#rTitle").value.trim(),artist:$("#rArtist").value.trim(),performer:$("#rPerformer").value.trim(),note:$("#rNote").value.trim(),status:"Pending"});
-    save(); closeModal("requestModal"); e.target.reset(); renderRequests();
+    const payload={
+      name:$("#rName")?.value.trim(),
+      title:$("#rTitle")?.value.trim(),
+      artist:$("#rArtist")?.value.trim(),
+      performer:$("#rPerformer")?.value.trim(),
+      key:$("#rKey")?.value.trim(),
+      duration:$("#rDuration")?.value.trim(),
+      reference:$("#rReference")?.value.trim(),
+      note:$("#rNote")?.value.trim(),
+      status:"Pending"
+    };
+    try {
+      await guestRequestAction("addGuestRequest", payload);
+      closeModal("requestModal"); e.target.reset(); await refreshGuestRequests();
+    } catch (err) {
+      alert(`Gagal menyimpan request ke Google Sheet: ${err.message}`);
+    }
   });
-  $("#addSongBtn").addEventListener("click",()=>openSong());
+  $("#addSongBtn")?.addEventListener("click",()=>openSong());
   $("#printBandGuideBtn")?.addEventListener("click",()=>window.print());
   $("#shareBandGuideBtn")?.addEventListener("click",async()=>{try{await navigator.share({title:"Fiqi & Tiara — Band Guide",text:"Wedding Music Planner — Band Guide"});}catch(e){}});
   $$(".band-tab").forEach(btn=>btn.addEventListener("click",()=>{bandGuideTab=btn.dataset.bgTab;localStorage.setItem("bandGuideTab",bandGuideTab);renderBandGuide();}));
@@ -462,11 +602,26 @@ document.addEventListener("DOMContentLoaded",()=>{
     localStorage.setItem("bandGuideOpen",JSON.stringify(bandGuideOpen));
     renderBandGuide();
   });
-  $("#addRequestBtn").addEventListener("click",()=>openModal("requestModal"));
+  $("#addRequestBtn")?.addEventListener("click",()=>openModal("requestModal"));
   $("#requestSearch")?.addEventListener("input", renderRequests);
   document.addEventListener("click", e => { const btn=e.target.closest(".guest-reference-btn"); if(btn?.dataset.reference) openReference(btn.dataset.reference); });
-  $("#searchInput").addEventListener("input",renderSongs);
-  ["categoryFilter","performerFilter","statusFilter"].forEach(id=>$("#"+id).addEventListener("change",renderSongs));
+  $("#searchInput")?.addEventListener("input",renderSongs);
+  ["categoryFilter","performerFilter","statusFilter"].forEach(id=>$("#"+id)?.addEventListener("change",renderSongs));
+
+  // Fetch Google Sheet after the UI is wired so network errors cannot block Login.
+  const remoteSongs = await fetchGoogleSheetSongs();
+  if (remoteSongs) {
+    songs = remoteSongs;
+    localStorage.setItem("weddingSongs", JSON.stringify(songs));
+    localStorage.setItem("weddingSongsVersion", SONG_DATA_VERSION + "-sheet");
+    renderSongs();
+    updateDashboard();
+    if (typeof renderBandGuide === "function") renderBandGuide();
+  }
+
+  // Guest Request is Google Sheet-only. Never restore requests from localStorage.
+  await refreshGuestRequests();
+
   const scrollHorizontalTable = (direction) => {
     const target = document.querySelector("#songsPage:not(.hidden) .table-scroll, #requestsPage:not(.hidden) .guest-table-scroll");
     if (!target) return;
